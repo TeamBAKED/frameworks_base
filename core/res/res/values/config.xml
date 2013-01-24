@@ -1103,6 +1103,10 @@
 
     <!-- If true, adds support for no delay A2DP in Samsung devices -->
     <bool name="config_noDelayInATwoDP">false</bool>
+   
+    <!-- Disable the home key unlock setting -->
+    <bool name="config_disableHomeUnlockSetting">true</bool>
+
 
     <!-- this sets the scan codes for the menu, home and back buttons for use in disabling
             buttons.  Since not all hardware buttons results in a hardKey being returned we 
