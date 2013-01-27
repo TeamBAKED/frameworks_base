@@ -77,8 +77,6 @@ import com.android.internal.widget.PointerLocationView;
 
 import dalvik.system.DexClassLoader;
 
-import android.service.dreams.IDreamManager;
-
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -168,6 +166,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.util.List;
+import java.lang.reflect.Constructor;
 
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
@@ -258,7 +257,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 KeyEvent.KEYCODE_CALCULATOR, Intent.CATEGORY_APP_CALCULATOR);
     }
 
-    DeviceKeyHandler mDeviceKeyHandler;
+    private DeviceKeyHandler mDeviceKeyHandler;
 
     /**
      * Lock protecting internal state.  Must not call out into window
@@ -1192,15 +1191,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             screenTurningOn(null);
         } else {
             screenTurnedOff(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
-	        }
+        }
 
-	        String deviceKeyHandlerLib = mContext.getResources().getString(
+        String deviceKeyHandlerLib = mContext.getResources().getString(
                 com.android.internal.R.string.config_deviceKeyHandlerLib);
 
         String deviceKeyHandlerClass = mContext.getResources().getString(
                 com.android.internal.R.string.config_deviceKeyHandlerClass);
 
-        if (!deviceKeyHandlerLib.equals("") && !deviceKeyHandlerClass.equals("")) {
+        if (!deviceKeyHandlerLib.isEmpty() && !deviceKeyHandlerClass.isEmpty()) {
             DexClassLoader loader =  new DexClassLoader(deviceKeyHandlerLib,
                     new ContextWrapper(mContext).getCacheDir().getAbsolutePath(),
                     null,
@@ -1210,9 +1209,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Constructor<?> constructor = klass.getConstructor(Context.class);
                 mDeviceKeyHandler = (DeviceKeyHandler) constructor.newInstance(
                         mContext);
-                Slog.d(TAG, "Device key handler loaded");
+                if(DEBUG) Slog.d(TAG, "Device key handler loaded");
             } catch (Exception e) {
-                Slog.d(TAG, "Could not instantiate device key handler "
+                Slog.w(TAG, "Could not instantiate device key handler "
                         + deviceKeyHandlerClass + " from class "
                         + deviceKeyHandlerLib, e);
             }
@@ -2623,11 +2622,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return -1;
         }
 
+        // Specific device key handling
         if (mDeviceKeyHandler != null) {
             try {
-                return mDeviceKeyHandler.handleKeyEvent(event);
+                // The device only should consume known keys.
+                if (mDeviceKeyHandler.handleKeyEvent(event)) {
+                    return -1;
+                }
             } catch (Exception e) {
-                Slog.d(TAG, "Could not dispatch event to device key handler", e);
+                Slog.w(TAG, "Could not dispatch event to device key handler", e);
             }
         }
 
