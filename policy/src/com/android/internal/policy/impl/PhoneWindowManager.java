@@ -2277,12 +2277,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // timeout.
         if (keyCode == KeyEvent.KEYCODE_HOME) {
 
-            // if this was a hardware press and hardware keys are disabled ignore it
-            // on the sgs3 this doesn't come back as a hardware press so we have to use the scan code
-            if (mDisableHardwareKeys && mHomeKeyScanCode >= 0 && scanCode == mHomeKeyScanCode) {
-                return -1;
-            }
-
             // If we have released the home key, and didn't do anything else
             // while it was pressed, then it is time to go home!
             if (!down && mHomePressed) {
@@ -2362,11 +2356,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (keyCode == KeyEvent.KEYCODE_MENU) {
             // Hijack modified menu keys for debugging features
             final int chordBug = KeyEvent.META_SHIFT_ON;
-
-            // if this was a hardware press and hardware keys are disabled ignore it
-            if (mDisableHardwareKeys && mMenuKeyScanCode >= 0 && scanCode == mMenuKeyScanCode) {
-                return -1;
-            }
 
             if (down) {
                 if (!mRecentAppsPreloaded && (mPressOnMenuBehavior == KEY_ACTION_APP_SWITCH ||
